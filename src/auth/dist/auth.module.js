@@ -13,6 +13,7 @@ var auth_controller_1 = require("./auth.controller");
 var user_module_1 = require("src/user/user.module");
 var prisma_module_1 = require("src/prisma/prisma.module");
 var auth_service_1 = require("./auth.service");
+var file_module_1 = require("src/file/file.module");
 var AuthModule = /** @class */ (function () {
     function AuthModule() {
     }
@@ -23,7 +24,8 @@ var AuthModule = /** @class */ (function () {
                     secret: process.env.JWT_SECRET //Importando variável de ambiente
                 }),
                 common_1.forwardRef(function () { return user_module_1.UserModule; }),
-                prisma_module_1.PrismaModule
+                prisma_module_1.PrismaModule,
+                file_module_1.FileModule
             ],
             controllers: [auth_controller_1.AuthController],
             providers: [auth_service_1.AuthService],

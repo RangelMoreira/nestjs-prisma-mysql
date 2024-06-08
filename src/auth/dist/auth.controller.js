@@ -51,9 +51,11 @@ var auth_guards_1 = require("src/guards/auth.guards");
 var user_decorator_1 = require("src/decorators/user.decorator");
 var throttler_1 = require("@nestjs/throttler");
 var platform_express_1 = require("@nestjs/platform-express");
+var path_1 = require("path");
 var AuthController = /** @class */ (function () {
-    function AuthController(authService) {
+    function AuthController(authService, fileService) {
         this.authService = authService;
+        this.fileService = fileService;
     }
     AuthController.prototype.login = function (_a) {
         var email = _a.email, password = _a.password;
@@ -95,8 +97,37 @@ var AuthController = /** @class */ (function () {
     };
     AuthController.prototype.uploadPhoto = function (user, photo) {
         return __awaiter(this, void 0, void 0, function () {
+            var path, error_1;
             return __generator(this, function (_a) {
-                return [2 /*return*/, { user: user, photo: photo }];
+                switch (_a.label) {
+                    case 0:
+                        path = path_1.join(__dirname, '..', '..', 'storage', 'photos', "photo-" + user.id + ".png");
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.fileService.upload(photo, path)];
+                    case 2:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        error_1 = _a.sent();
+                        throw new common_1.BadRequestException();
+                    case 4: return [2 /*return*/, { sucess: true }];
+                }
+            });
+        });
+    };
+    AuthController.prototype.uploadFiles = function (user, files) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, files];
+            });
+        });
+    };
+    AuthController.prototype.uploadFilesFields = function (user, files) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, files];
             });
         });
     };
@@ -123,11 +154,29 @@ var AuthController = /** @class */ (function () {
         __param(0, user_decorator_1.User())
     ], AuthController.prototype, "me");
     __decorate([
-        common_1.UseInterceptors(platform_express_1.FileInterceptor),
+        common_1.UseInterceptors(platform_express_1.FileInterceptor('file')),
         common_1.UseGuards(auth_guards_1.AuthGuard),
         common_1.Post('photo'),
-        __param(0, user_decorator_1.User()), __param(1, common_1.Body('file'))
+        __param(0, user_decorator_1.User()), __param(1, common_1.UploadedFile())
     ], AuthController.prototype, "uploadPhoto");
+    __decorate([
+        common_1.UseInterceptors(platform_express_1.FilesInterceptor('files')),
+        common_1.UseGuards(auth_guards_1.AuthGuard),
+        common_1.Post('files-fields'),
+        __param(0, user_decorator_1.User()), __param(1, common_1.UploadedFiles())
+    ], AuthController.prototype, "uploadFiles");
+    __decorate([
+        common_1.UseInterceptors(platform_express_1.FileFieldsInterceptor([{
+                name: 'photo',
+                maxCount: 1
+            }, {
+                name: 'documents',
+                maxCount: 10
+            }])),
+        common_1.UseGuards(auth_guards_1.AuthGuard),
+        common_1.Post('files-fields'),
+        __param(0, user_decorator_1.User()), __param(1, common_1.UploadedFiles())
+    ], AuthController.prototype, "uploadFilesFields");
     AuthController = __decorate([
         common_1.Controller('auth')
     ], AuthController);
